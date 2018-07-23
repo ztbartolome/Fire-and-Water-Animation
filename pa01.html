@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html>
+
+  <!--
+  Zeline Tricia Bartolome
+  31 January 2018
+  
+  This program meets all the requirements for PA01:
+  1. The six different objects are plane, torus knot, dodecahedron, octahedron, cylinder, and torus.
+  2. There are three planes with different sizes.
+  3. There is a white light, a blue light, and a red light, all of them casting shadows.
+  4. There are three different textured planes that receive shadows.
+  5. The position of two planes is animated.
+     The rotation of the torus knot, dodecahedron, octahedron, cylinder, and torus is animated.
+	 The red and blue lights are changing position vertically.
+	 The camera is moving left to right.
+
+  -->
+
+	<head>
+		<meta charset=utf-8>
+		<title>pa01</title>
+		<style>
+			body { margin: 0; }
+			canvas { width: 100%; height: 100%;}
+		</style>
+	</head>
+	
+	<body>
+		<script src="three.js"></script>
+		<script>
+			var scene = new THREE.Scene();
+			var camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 1000 );
+			var renderer = new THREE.WebGLRenderer();
+			var count = 0;
+				
+			var bigPlane;
+			var firePlane;
+			var waterPlane;
+			var knot;
+			var dodecahedron;
+			var octahedron;
+			var cylinder;
+			var torus;
+			
+			var redLight;
+			var blueLight;
+			
+			initialize();
+			animate();
+			
+			function initialize(){
+
+				renderer.setSize( window.innerWidth, window.innerHeight );
+				renderer.shadowMap.enabled = true;
+				renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+				document.body.appendChild( renderer.domElement );
+				var metal = new THREE.TextureLoader().load( 'iorngrat.jpg' );
+				var fire = new THREE.TextureLoader().load( 'fire2.jpg' );
+				var water = new THREE.TextureLoader().load( '00water-texture.jpg' );
+				
+				camera.position.z = 17;
+				camera.position.y = 7;
+				
+				var firePlaneGeometry = new THREE.PlaneGeometry( 5, 20, 5, 5 );
+				var firePlaneMaterial = new THREE.MeshLambertMaterial( { color: 0xaaaaaa, map: fire, side:THREE.DoubleSide } );
+				firePlane = new THREE.Mesh(firePlaneGeometry, firePlaneMaterial);
+				scene.add(firePlane);
+				firePlane.rotateY(Math.PI/2);
+				firePlane.position.x = -10;
+				firePlane.receiveShadow = true;
+				
+				var waterPlaneGeometry = new THREE.PlaneGeometry( 10, 20, 5, 5 );
+				var waterPlaneMaterial = new THREE.MeshLambertMaterial( { color: 0xaaaaaa, map: water, side:THREE.DoubleSide } );
+				waterPlane = new THREE.Mesh(waterPlaneGeometry, waterPlaneMaterial);
+				scene.add(waterPlane);
+				waterPlane.rotateY(Math.PI/2);
+				waterPlane.position.x = 10;
+				waterPlane.receiveShadow = true;
+				
+				var bigPlaneGeometry = new THREE.PlaneGeometry( 20, 15, 5, 5 );
+				var bigPlaneMaterial = new THREE.MeshLambertMaterial( { color: 0xaaaaaa,  map: metal ,side:THREE.DoubleSide} );
+				bigPlane = new THREE.Mesh( bigPlaneGeometry, bigPlaneMaterial );
+				scene.add(bigPlane);
+				bigPlane.receiveShadow = true;
+				bigPlane.rotateX(Math.PI/2);
+				
+				var cylGeometry = new THREE.CylinderBufferGeometry( 1, 1, 2, 10 );
+				var cylMaterial = new THREE.MeshLambertMaterial( { color: 0x808080} );
+				cylinder = new THREE.Mesh( cylGeometry, cylMaterial );
+				scene.add(cylinder);
+				cylinder.castShadow = true;
+				cylinder.position.y = 7;
+								
+				var knotGeometry = new THREE.TorusKnotGeometry();
+				var knotMaterial = new THREE.MeshLambertMaterial( { color: 0x808080} );
+				knot = new THREE.Mesh( knotGeometry, knotMaterial );
+				scene.add(knot);
+				knot.castShadow = true;
+				knot.position.x = -4;
+				knot.position.y = 3;
+				knot.position.z = -2;
+
+				var dodGeometry = new THREE.DodecahedronGeometry(1, 0);
+				var dodMaterial = new THREE.MeshLambertMaterial( { color: 0x808080} );
+				dodecahedron = new THREE.Mesh( dodGeometry, dodMaterial );
+				scene.add(dodecahedron);
+				dodecahedron.castShadow = true;
+				dodecahedron.position. x = -5;
+				dodecahedron.position.y = 8;
+				dodecahedron.position.z = 5;
+				
+				var octGeometry = new THREE.OctahedronGeometry(1, 0);
+				var octMaterial = new THREE.MeshLambertMaterial( { color: 0x808080} );
+				octahedron = new THREE.Mesh( octGeometry, octMaterial );
+				scene.add(octahedron);
+				octahedron.castShadow = true;
+				octahedron.position.x = 5;
+				octahedron.position.y = 10;
+				octahedron.position.z = 3;
+				
+				var torusGeometry = new THREE.TorusGeometry(1, 0.4, 16, 12);
+				var torusMaterial = new THREE.MeshLambertMaterial( { color: 0x808080} );
+				torus = new THREE.Mesh( torusGeometry, torusMaterial );
+				scene.add(torus);
+				torus.castShadow = true;
+				torus.rotateX(2);
+				torus.position.x = 3;
+				torus.position.y = 2;
+				torus.position.z = 4;
+
+				redLight = new THREE.SpotLight( 0xff0000 );
+				redLight.position.set( 12, 0, 0);
+				redLight.castShadow = true;
+				scene.add( redLight );
+				
+				blueLight = new THREE.SpotLight( 0x0000ff );
+				blueLight.position.set( -12, 0, 0 );
+				blueLight.castShadow = true;
+				scene.add( blueLight );
+				
+				var light = new THREE.SpotLight( 0xaaaaff );
+				light.position.set( 0, 10, 0 );
+				light.castShadow = true;
+				scene.add( light );
+				light.position.y = 20;
+				
+				/*
+				var spotLightHelper = new THREE.SpotLightHelper( light );
+				var blueLightHelper = new THREE.SpotLightHelper( blueLight );
+				var redLightHelper = new THREE.SpotLightHelper( redLight );
+				scene.add( spotLightHelper );
+				scene.add( blueLightHelper );
+				scene.add( redLightHelper );
+				*/
+
+				//Set up shadow properties for the light
+				light.shadow.mapSize.width = 2048;  // default
+				light.shadow.mapSize.height = 2048; // default
+				light.shadow.camera.near = 0.5;       // default
+				light.shadow.camera.far = 500      // default
+				
+			}
+			
+			function animate(){
+				requestAnimationFrame( animate );
+				renderer.render( scene, camera );
+				count++;
+				
+				cylinder.rotateX(0.1);
+				knot.rotateY(0.1);
+				dodecahedron.rotateZ(0.1);
+				octahedron.rotateX(0.1);
+				torus.rotateY(0.1);
+				
+				firePlane.position.y = 10*Math.sin(count*0.01);
+				redLight.power = 5*Math.sin(count*0.01);
+				redLight.position.y = 10*Math.sin(count*0.01);
+				waterPlane.position.y = 10*Math.cos(count*0.01);
+				blueLight.power = 5*Math.cos(count*0.01);
+				blueLight.position.y = 10*Math.cos(count*0.01);
+				camera.position.x = 3*Math.sin(count*0.01);
+			}
+			
+		</script>
+	</body>
+</html>
